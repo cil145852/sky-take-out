@@ -35,4 +35,10 @@ public interface EmployeeMapper {
      */
     List<Employee> selectByLikeName(String name);
 
+    /**
+     * 更新员工数据
+     * @param employee
+     */
+    void update(Employee employee);
+
 }

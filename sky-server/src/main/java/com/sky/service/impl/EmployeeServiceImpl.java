@@ -58,7 +58,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
-        if (employee.getStatus() == StatusConstant.DISABLE) {
+        if (employee.getStatus().equals(StatusConstant.DISABLE)) {
             //账号被锁定
             throw new AccountLockedException(MessageConstant.ACCOUNT_LOCKED);
         }
@@ -69,6 +69,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * 保存员工信息
+     *
      * @param employeeDTO
      */
     @Override
@@ -86,6 +87,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     /**
      * 使用PageHelper插件分页查询员工
+     *
      * @param employeePageQueryDTO
      * @return
      */
@@ -95,6 +97,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         List<Employee> employeeList = employeeMapper.selectByLikeName(employeePageQueryDTO.getName());
         PageInfo<Employee> pageInfo = new PageInfo<>(employeeList);
         return new PageResult(pageInfo.getTotal(), pageInfo.getList());
+    }
+
+    /**
+     * 修改员工状态
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStop(Integer status, Long id) {
+        employeeMapper.update(Employee.builder().status(status).id(id).build());
     }
 
 }
