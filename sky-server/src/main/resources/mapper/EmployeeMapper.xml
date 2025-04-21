@@ -30,4 +30,23 @@
         </set>
         WHERE `id` = #{id}
     </update>
+
+    <select id="selectList" resultType="employee">
+        SELECT `id`, `name`, `username`, `password`, `phone`, `sex`, `id_number`, `status`, `create_time`, `update_time`, `create_user`, `update_user`
+        FROM `employee`
+        <where>
+            <if test="id != null">AND `id` = #{id}</if>
+            <if test="username != null">AND `username` = #{username}</if>
+            <if test="name != null">AND `name` = #{name}</if>
+            <if test="password != null">AND `password` = #{password}</if>
+            <if test="phone != null">AND `phone` = #{phone}</if>
+            <if test="sex != null">AND `sex` = #{sex}</if>
+            <if test="idNumber != null">AND `id_number` = #{idNumber}</if>
+            <if test="status != null">AND `status` = #{status}</if>
+            <if test="createTime != null">AND `create_time` = #{createTime}</if>
+            <if test="updateTime != null">AND `update_time` = #{updateTime}</if>
+            <if test="createUser != null">AND `create_user` = #{createUser}</if>
+            <if test="updateUser != null">AND `update_user` = #{updateUser}</if>
+        </where>
+    </select>
 </mapper>

@@ -20,6 +20,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.ObjectUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -43,13 +44,16 @@ public class EmployeeServiceImpl implements EmployeeService {
         String password = employeeLoginDTO.getPassword();
 
         //1、根据用户名查询数据库中的数据
-        Employee employee = employeeMapper.getByUsername(username);
+
+        List<Employee> employeeList = employeeMapper.selectList(Employee.builder().username(username).build());
 
         //2、处理各种异常情况（用户名不存在、密码不对、账号被锁定）
-        if (employee == null) {
+        if (ObjectUtils.isEmpty(employeeList)) {
             //账号不存在
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
+        //账户存在取出员工对象
+        Employee employee = employeeList.get(0);
 
         //密码比对
         password = DigestUtils.md5DigestAsHex(password.getBytes());
@@ -109,4 +113,30 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeMapper.update(Employee.builder().status(status).id(id).build());
     }
 
+    /**
+     * 根据id查询员工
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+        List<Employee> employeeList = employeeMapper.selectList(Employee.builder().id(id).build());
+        if (ObjectUtils.isEmpty(employeeList)) {
+            return null;
+        }
+        return employeeList.get(0);
+    }
+
+    /**
+     * 修改员工信息
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+        employeeMapper.update(employee);
+    }
 }
