@@ -9,6 +9,9 @@ import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
+/**
+ * @author liang
+ */
 @Mapper
 public interface DishMapper {
 
@@ -34,4 +37,16 @@ public interface DishMapper {
      */
     List<DishVO> selectWithCategory(Dish dish);
 
+    /**
+     * 根据id批量查询菜品数据
+     * @param ids
+     * @return
+     */
+    List<Dish> selectByIds(List<Long> ids);
+
+    /**
+     * 根据id批量删除菜品
+     * @param ids
+     */
+    void deleteBatch(List<Long> ids);
 }
