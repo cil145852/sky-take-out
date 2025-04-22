@@ -2,29 +2,20 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.DishMapper">
+    <resultMap id="dishVoResultMap" type="com.sky.vo.DishVO">
+        <id property="id" column="id"/>
+        <collection property="flavors" ofType="dishFlavor">
+            <id property="id" column="flavor_id"/>
+            <result property="name" column="flavor_name"/>
+            <result property="dishId" column="id"/>
+            <result property="value" column="flavor"/>
+        </collection>
+    </resultMap>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `dish`(`name`, `category_id`, `price`, `image`, `description`, `status`, `create_time`, `update_time`, `create_user`, `update_user`)
         VALUES (#{name}, #{categoryId}, #{price}, #{image}, #{description}, #{status}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
-
-    <select id="selectWithCategory" resultType="com.sky.vo.DishVO">
-        SELECT `dish`.*, `category`.name AS `category_name`
-        FROM `dish`
-                 LEFT JOIN `category`
-                           ON `dish`.category_id = `category`.id
-        <where>
-            <if test="name != null">
-                AND dish.`name` LIKE concat('%', #{name}, '%')
-            </if>
-            <if test="categoryId != null">
-                AND dish.category_id = #{categoryId}
-            </if>
-            <if test="status != null">
-                AND dish.status = #{status}
-            </if>
-        </where>
-        ORDER BY dish.update_time DESC
-    </select>
 
     <select id="selectByIds" resultType="dish">
         SELECT `id`,
@@ -52,4 +43,79 @@
             #{id}
         </foreach>
     </delete>
+
+    <sql id="dishWhere">
+        <where>
+            <if test="id != null">
+                AND `dish`.id = #{id}
+            </if>
+            <if test="name != null">
+                AND `dish`.name LIKE concat('%', #{name}, '%')
+            </if>
+            <if test="categoryId != null">
+                AND `dish`.category_id = #{categoryId}
+            </if>
+            <if test="status != null">
+                AND `dish`.status = #{status}
+            </if>
+            <if test="description != null">
+                AND `dish`.description LIKE concat('%', #{description}, '%')
+            </if>
+        </where>
+        ORDER BY `dish`.update_time DESC
+    </sql>
+
+    <select id="selectWithCategoryAndFlavors" resultMap="dishVoResultMap">
+        SELECT `dish`.*,
+               `category`.name     AS `category_name`,
+               `dish_flavor`.value AS `flavor`,
+               `dish_flavor`.id    AS `flavor_id`,
+               `dish_flavor`.name  AS `flavor_name`
+        FROM `dish`
+                 LEFT JOIN `category`
+                           ON `dish`.category_id = `category`.id
+                 LEFT JOIN `dish_flavor`
+                           ON `dish`.id = `dish_flavor`.dish_id
+        <include refid="dishWhere"/>
+    </select>
+
+    <select id="selectWithCategory" resultType="com.sky.vo.DishVO">
+        SELECT `dish`.*,
+        `category`.name AS `category_name`
+        FROM `dish`
+        LEFT JOIN `category`
+        ON `dish`.category_id = `category`.id
+        <include refid="dishWhere"/>
+    </select>
+
+    <update id="update">
+        UPDATE `dish`
+        <set>
+            <if test="name != null">
+                `name` = #{name},
+            </if>
+            <if test="categoryId != null">
+                `category_id` = #{categoryId},
+            </if>
+            <if test="price != null">
+                `price` = #{price},
+            </if>
+            <if test="image != null">
+                `image` = #{image},
+            </if>
+            <if test="description != null">
+                `description` = #{description},
+            </if>
+            <if test="status != null">
+                `status` = #{status},
+            </if>
+            <if test="updateTime != null">
+                `update_time` = #{updateTime},
+            </if>
+            <if test="updateUser != null">
+                `update_user` = #{updateUser},
+            </if>
+        </set>
+        WHERE `id` = #{id}
+    </update>
 </mapper>
