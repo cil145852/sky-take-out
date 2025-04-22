@@ -24,4 +24,24 @@
         VALUES
         (#{name}, #{categoryId}, #{price}, #{status}, #{description}, #{image}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
     </insert>
+
+    <sql id="setmealWhere">
+        <where>
+            <if test="id != null">AND `setmeal`.id = #{id}</if>
+            <if test="categoryId != null">AND `setmeal`.category_id = #{categoryId}</if>
+            <if test="name != null">AND `setmeal`.name LIKE CONCAT('%',#{name},'%')</if>
+            <if test="status != null">AND `setmeal`.status = #{status}</if>
+            <if test="price != null">AND `setmeal`.price = #{price}</if>
+            <if test="description != null">AND `setmeal`.description LIKE CONCAT('%',#{description},'%')</if>
+        </where>
+    </sql>
+
+    <select id="selectWithCategory" resultType="com.sky.vo.SetmealVO">
+        SELECT `setmeal`.*, `category`.name AS `category_name`
+        FROM `setmeal`
+                 LEFT JOIN `category`
+                           ON `setmeal`.category_id = `category`.id
+        <include refid="setmealWhere"/>
+        ORDER BY `setmeal`.create_time DESC
+    </select>
 </mapper>
