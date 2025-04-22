@@ -8,10 +8,12 @@ import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.entity.Dish;
 import com.sky.entity.DishFlavor;
+import com.sky.entity.Setmeal;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
+import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
@@ -43,6 +45,9 @@ public class DishServiceImpl implements DishService {
     @Resource
     private SetmealDishMapper setmealDishMapper;
 
+    @Resource
+    private SetmealMapper setmealMapper;
+
 
     /**
      * 新增菜品同时添加菜品对应的口味数据
@@ -70,6 +75,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 分页查询菜品和分类名称
+     *
      * @param dishPageQueryDTO
      * @return
      */
@@ -85,6 +91,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 批量删除菜品
+     *
      * @param ids
      */
     @Override
@@ -98,7 +105,7 @@ public class DishServiceImpl implements DishService {
 
         //如果菜品在某个套餐中，不能删除
         List<Long> setmealIds = setmealDishMapper.selectSetmealIdsByDishIds(ids);
-        if(!ObjectUtils.isEmpty(setmealIds)) {
+        if (!ObjectUtils.isEmpty(setmealIds)) {
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
 
@@ -109,6 +116,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 根据id查询菜品和菜品对应的分类和口味数据
+     *
      * @param id
      * @return
      */
@@ -125,6 +133,7 @@ public class DishServiceImpl implements DishService {
 
     /**
      * 修改菜品和口味数据
+     *
      * @param dishDTO
      */
     @Override
@@ -140,6 +149,25 @@ public class DishServiceImpl implements DishService {
         if (!ObjectUtils.isEmpty(dishDTO.getFlavors())) {
             dishDTO.getFlavors().forEach(dishFlavor -> dishFlavor.setDishId(dishDTO.getId()));
             dishFlavorMapper.insertBatch(dishDTO.getFlavors());
+        }
+    }
+
+    /**
+     * 启售停售菜品，本质上是修改菜品状态
+     *
+     * @param status
+     * @param id
+     */
+    @Override
+    public void startOrStopSale(Integer status, Long id) {
+        dishMapper.update(Dish.builder().id(id).status(status).build());
+
+        //如果菜品状态为停售，则将菜品所在的套餐状态也修改为停售
+        if (status.equals(StatusConstant.DISABLE)) {
+            List<Long> setmealIds = setmealDishMapper.selectSetmealIdsByDishIds(Collections.singletonList(id));
+            for (Long setmealId : setmealIds) {
+                setmealMapper.update(Setmeal.builder().id(setmealId).status(StatusConstant.DISABLE).build());
+            }
         }
     }
 }
