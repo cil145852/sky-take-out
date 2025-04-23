@@ -7,6 +7,7 @@ import com.sky.constant.StatusConstant;
 import com.sky.dto.SetmealDTO;
 import com.sky.dto.SetmealPageQueryDTO;
 import com.sky.entity.Setmeal;
+import com.sky.entity.SetmealDish;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
@@ -17,8 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -80,5 +83,44 @@ public class SetmealServiceImpl implements SetmealService {
             throw new DeletionNotAllowedException(MessageConstant.SETMEAL_ON_SALE);
         }
         setmealMapper.deleteBatch(ids);
+        setmealDishMapper.deleteBySetmealId(ids);
+    }
+
+
+    /**
+     * 修改套餐信息
+     * @param setmealDTO
+     */
+    @Override
+    @Transactional
+    public void update(SetmealDTO setmealDTO) {
+        //先修改套餐表中的数据
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+        setmealMapper.update(setmeal);
+
+        //由于套餐与菜品是多对多的关系，即一个套餐在套餐菜品关联表中有多个数据，所以需要先删除套餐和菜品的关联数据，再重新插入
+        setmealDishMapper.deleteBySetmealId(Collections.singletonList(setmealDTO.getId()));
+
+        //插入套餐和菜品关系，插入前需要设置套餐id
+        List<SetmealDish> setmealDishes = setmealDTO.getSetmealDishes();
+        Long setmealId = setmealDTO.getId();
+        setmealDishes.forEach(setmealDish -> setmealDish.setSetmealId(setmealId));
+        setmealDishMapper.insertBatch(setmealDishes);
+    }
+
+    /**
+     * 根据id查询套餐及套餐分类和套餐的菜品信息
+     * @param id
+     * @return
+     */
+    @Override
+    public SetmealVO getById(Long id) {
+        List<SetmealVO> setmealVOList = setmealMapper.selectWithCategoryAndDish(Setmeal.builder().id(id).build());
+        if (!ObjectUtils.isEmpty(setmealVOList)) {
+            return setmealVOList.get(0);
+        } else {
+            return null;
+        }
     }
 }

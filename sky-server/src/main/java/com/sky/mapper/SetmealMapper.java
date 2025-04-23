@@ -56,4 +56,11 @@ public interface SetmealMapper {
      * @return
      */
     List<Setmeal> selectByIds(List<Long> ids);
+
+    /**
+     * 根据条件查询套餐及套餐分类和关联的菜品信息
+     * @param setmeal
+     * @return
+     */
+    List<SetmealVO> selectWithCategoryAndDish(Setmeal setmeal);
 }

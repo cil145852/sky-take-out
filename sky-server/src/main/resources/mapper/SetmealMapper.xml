@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.SetmealMapper">
+    <resultMap id="setmealVOResultMap" type="com.sky.vo.SetmealVO">
+        <id column="id" property="id"/>
+        <collection ofType="setmealDish" property="setmealDishes">
+            <id column="setmeal_dish_id" property="id"/>
+            <result column="id" property="setmealId"/>
+            <result column="dish_name" property="name"/>
+            <result column="dish_price" property="price"/>
+        </collection>
+    </resultMap>
 
     <update id="update">
         UPDATE `setmeal`
@@ -63,5 +72,23 @@
         FROM `setmeal`
         WHERE `id` IN
         <include refid="foreachIds"/>
+    </select>
+
+    <select id="selectWithCategoryAndDish" resultMap="setmealVOResultMap">
+        SELECT `setmeal`.*,
+               `category`.name AS `category_name`,
+               `setmeal_dish`.id AS `setmeal_dish_id`,
+               `setmeal_dish`.dish_id AS `dish_id`,
+               `setmeal_dish`.name AS `dish_name`,
+               `setmeal_dish`.copies AS `copies`,
+               `setmeal_dish`.price AS `dish_price`
+
+        FROM `setmeal`
+                 LEFT JOIN `category`
+                           ON `setmeal`.category_id = `category`.id
+                 LEFT JOIN `setmeal_dish`
+                           ON `setmeal`.id = `setmeal_dish`.setmeal_id
+        <include refid="setmealWhere"/>
+        ORDER BY `setmeal`.create_time DESC
     </select>
 </mapper>
