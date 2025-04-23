@@ -48,4 +48,11 @@ public interface SetmealService {
     * @return
     */
    SetmealVO getById(Long id);
+
+   /**
+    * 启售停售套餐
+    * @param status
+    * @param id
+    */
+   void startOrStopSale(Integer status, Long id);
 }
