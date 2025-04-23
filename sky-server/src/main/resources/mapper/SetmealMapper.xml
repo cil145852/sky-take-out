@@ -44,4 +44,24 @@
         <include refid="setmealWhere"/>
         ORDER BY `setmeal`.create_time DESC
     </select>
+
+    <sql id="foreachIds">
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </sql>
+
+    <delete id="deleteBatch">
+        DELETE
+        FROM `setmeal`
+        WHERE `id` IN
+        <include refid="foreachIds"/>
+    </delete>
+
+    <select id="selectByIds" resultType="setmeal">
+        SELECT *
+        FROM `setmeal`
+        WHERE `id` IN
+        <include refid="foreachIds"/>
+    </select>
 </mapper>

@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * @author liang
@@ -49,5 +50,18 @@ public class SetmealController {
     public Result<PageResult> pageQuery(SetmealPageQueryDTO setmealPageQueryDTO) {
         log.info("套餐分页查询：{}", setmealPageQueryDTO);
         return Result.success(setmealService.pageQuery(setmealPageQueryDTO));
+    }
+
+    /**
+     * 根据id批量删除套餐
+     * @param ids
+     * @return
+     */
+    @DeleteMapping
+    @ApiOperation("批量删除套餐")
+    public Result deleteBatch(@RequestParam List<Long> ids) {
+        log.info("批量删除套餐：{}", ids);
+        setmealService.deleteBatch(ids);
+        return Result.success();
     }
 }

@@ -43,4 +43,17 @@ public interface SetmealMapper {
      * @return
      */
     List<SetmealVO> selectWithCategory(Setmeal setmeal);
+
+    /**
+     * 根据id批量删除套餐
+     * @param ids
+     */
+    void deleteBatch(List<Long> ids);
+
+    /**
+     * 根据id批量查询套餐
+     * @param ids
+     * @return
+     */
+    List<Setmeal> selectByIds(List<Long> ids);
 }
