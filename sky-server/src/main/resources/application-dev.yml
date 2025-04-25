@@ -11,3 +11,8 @@ sky:
     bucket-name: oss-cjl-sky-takeout
     access-key-id: LTAI5t8qJfywGhvK65fshod5
     access-key-secret: sG7UrRsC46j6PlxzKMPMZ0zJ7d6pAr
+  redis:
+    host: localhost
+    port: 6379
+    password: cjl123456
+    database: 0
