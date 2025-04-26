@@ -91,4 +91,11 @@
         <include refid="setmealWhere"/>
         ORDER BY `setmeal`.create_time DESC
     </select>
+
+    <select id="selectList" resultType="setmeal">
+        SELECT *
+        FROM `setmeal`
+        <include refid="setmealWhere"/>
+        ORDER BY `setmeal`.update_time DESC
+    </select>
 </mapper>

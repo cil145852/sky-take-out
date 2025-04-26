@@ -180,4 +180,18 @@ public class DishServiceImpl implements DishService {
     public List<Dish> getByCategoryId(Long categoryId) {
         return dishMapper.selectList(Dish.builder().categoryId(categoryId).build());
     }
+
+    /**
+     * 根据分类id查询正在出售菜品及其口味数据
+     * @param categoryId
+     * @return
+     */
+    @Override
+    public List<DishVO> listWithFlavor(Long categoryId) {
+        Dish dish = Dish.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+        return dishMapper.selectWithCategoryAndFlavors(dish);
+    }
 }

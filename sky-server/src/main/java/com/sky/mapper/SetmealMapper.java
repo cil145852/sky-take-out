@@ -63,4 +63,11 @@ public interface SetmealMapper {
      * @return
      */
     List<SetmealVO> selectWithCategoryAndDish(Setmeal setmeal);
+
+    /**
+     * 根据条件查询套餐
+     * @param setmeal
+     * @return
+     */
+    List<Setmeal> selectList(Setmeal setmeal);
 }

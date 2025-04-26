@@ -1,6 +1,7 @@
 package com.sky.mapper;
 
 import com.sky.entity.SetmealDish;
+import com.sky.vo.DishItemVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -39,4 +40,11 @@ public interface SetmealDishMapper {
      * @return
      */
     List<Long> selectDishIdsBySetmealId(List<Long> setmealIds);
+
+    /**
+     * 查询套餐中所包含的菜品项
+     * @param setmealId
+     * @return
+     */
+    List<DishItemVO> selectDishItemsBySetmealId(Long setmealId);
 }

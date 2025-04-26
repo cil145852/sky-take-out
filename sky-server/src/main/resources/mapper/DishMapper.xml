@@ -7,7 +7,6 @@
         <collection property="flavors" ofType="dishFlavor">
             <id property="id" column="flavor_id"/>
             <result property="name" column="flavor_name"/>
-            <result property="dishId" column="id"/>
             <result property="value" column="flavor"/>
         </collection>
     </resultMap>

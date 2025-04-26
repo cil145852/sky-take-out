@@ -38,4 +38,14 @@
         WHERE `setmeal_id` IN
         <include refid="foreachSetmealId"/>
     </select>
+
+    <select id="selectDishItemsBySetmealId" resultType="com.sky.vo.DishItemVO">
+        SELECT `setmeal_dish`.copies,
+               `setmeal_dish`.name,
+               `dish`.description,
+               `dish`.image
+        FROM `setmeal_dish`
+                 LEFT JOIN `dish` ON `setmeal_dish`.dish_id = `dish`.id
+        WHERE `setmeal_dish`.setmeal_id = #{setmealId}
+    </select>
 </mapper>
