@@ -37,6 +37,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     /**
      * 将菜品或套餐添加到购物车中
+     *
      * @param shoppingCartDTO
      */
     @Override
@@ -71,5 +72,18 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             shoppingCart.setNumber(shoppingCart.getNumber() + 1);
             shoppingCartMapper.update(shoppingCart);
         }
+    }
+
+    /**
+     * 查看用户的购物车信息
+     *
+     * @return
+     */
+    @Override
+    public List<ShoppingCart> listShoppingCarts() {
+        ShoppingCart shoppingCart = ShoppingCart.builder()
+                .userId(BaseContext.getCurrentId())
+                .build();
+        return shoppingCartMapper.selectList(shoppingCart);
     }
 }
