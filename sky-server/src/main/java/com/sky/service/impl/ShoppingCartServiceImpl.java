@@ -43,11 +43,8 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public void addShoppingCart(ShoppingCartDTO shoppingCartDTO) {
         //先查询购物车中是否已经存在该菜品/套餐
-        ShoppingCart shoppingCart = new ShoppingCart();
-        BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
-        shoppingCart.setUserId(BaseContext.getCurrentId());
-        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectList(shoppingCart);
-        if (ObjectUtils.isEmpty(shoppingCartList)) {
+        ShoppingCart shoppingCart = getShoppingCartByDTO(shoppingCartDTO);
+        if (shoppingCart.getId() == null) {
             //如果不存在，则将菜品/套餐添加到购物车中
             shoppingCart.setNumber(1);
             shoppingCart.setCreateTime(LocalDateTime.now());
@@ -68,7 +65,6 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
             shoppingCartMapper.insert(shoppingCart);
         } else {
             //如果存在，则将菜品/套餐的数量加1
-            shoppingCart = shoppingCartList.get(0);
             shoppingCart.setNumber(shoppingCart.getNumber() + 1);
             shoppingCartMapper.update(shoppingCart);
         }
@@ -93,5 +89,42 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public void cleanShoppingCart() {
         shoppingCartMapper.deleteByUserId(BaseContext.getCurrentId());
+    }
+
+    /**
+     * 删除购物车中一个商品
+     * 如果购物车中数量为1，则直接删除
+     * 如果购物车中数量大于1，则数量减一
+     * @param shoppingCartDTO
+     */
+    @Override
+    public void subShoppingCart(ShoppingCartDTO shoppingCartDTO) {
+        //要获取商品的数量信息，所以要查询购物车中该商品的信息
+        ShoppingCart shoppingCart = getShoppingCartByDTO(shoppingCartDTO);
+
+        if (shoppingCart.getId() != null) {
+            if (shoppingCart.getNumber() == 1) {
+                shoppingCartMapper.deleteById(shoppingCart.getId());
+            } else {
+                shoppingCart.setNumber(shoppingCart.getNumber() - 1);
+                shoppingCartMapper.update(shoppingCart);
+            }
+        } else {
+            throw new RuntimeException("购物车中没有该商品");
+        }
+
+    }
+
+    private ShoppingCart getShoppingCartByDTO(ShoppingCartDTO shoppingCartDTO) {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        BeanUtils.copyProperties(shoppingCartDTO, shoppingCart);
+        shoppingCart.setUserId(BaseContext.getCurrentId());
+        List<ShoppingCart> shoppingCartList = shoppingCartMapper.selectList(shoppingCart);
+
+        if (ObjectUtils.isEmpty(shoppingCartList)) {
+            return shoppingCart;
+        }
+
+        return shoppingCartList.get(0);
     }
 }

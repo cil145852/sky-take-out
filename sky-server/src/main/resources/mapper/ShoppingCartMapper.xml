@@ -70,4 +70,9 @@
         DELETE FROM `shopping_cart`
         WHERE `user_id` = #{userId}
     </delete>
+
+    <delete id="deleteById">
+        DELETE FROM `shopping_cart`
+        WHERE `id` = #{id}
+    </delete>
 </mapper>

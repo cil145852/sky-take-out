@@ -29,4 +29,12 @@ public interface ShoppingCartService {
     * 清空用户的购物车
     */
    void cleanShoppingCart();
+
+   /**
+    * 删除购物车中一个商品
+    * 如果购物车中数量为1，则直接删除
+    * 如果购物车中数量大于1，则数量减一
+    * @param shoppingCartDTO
+    */
+   void subShoppingCart(ShoppingCartDTO shoppingCartDTO);
 }
