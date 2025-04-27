@@ -65,4 +65,9 @@
         </set>
         WHERE `id` = #{id}
     </update>
+
+    <delete id="deleteByUserId">
+        DELETE FROM `shopping_cart`
+        WHERE `user_id` = #{userId}
+    </delete>
 </mapper>
