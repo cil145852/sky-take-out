@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.ShoppingCartMapper">
+    <sql id="shoppingCartWhere">
+        <where>
+            <if test="userId != null">
+                AND user_id = #{userId}
+            </if>
+            <if test="dishId != null">
+                AND dish_id = #{dishId}
+            </if>
+            <if test="setmealId != null">
+                AND setmeal_id = #{setmealId}
+            </if>
+            <if test="dishFlavor != null">
+                AND dish_flavor = #{dishFlavor}
+            </if>
+            <if test="name != null">
+                AND name LIKE CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </sql>
+    <select id="selectList" resultType="shoppingCart">
+        SELECT *
+        FROM `shopping_cart`
+        <include refid="shoppingCartWhere"/>
+    </select>
+
+    <insert id="insert">
+        INSERT INTO `shopping_cart` (`name`, `image`, `user_id`, `dish_id`, `setmeal_id`, `dish_flavor`, `number`, `amount`, `create_time`)
+        VALUES (#{name}, #{image}, #{userId}, #{dishId}, #{setmealId}, #{dishFlavor}, #{number}, #{amount}, #{createTime})
+    </insert>
+
+    <update id="update">
+        UPDATE `shopping_cart`
+        <set>
+            <if test="name != null">
+                `name` = #{name},
+            </if>
+            <if test="image != null">
+                `image` = #{image},
+            </if>
+            <if test="userId != null">
+                `user_id` = #{userId},
+            </if>
+            <if test="dishId != null">
+                `dish_id` = #{dishId},
+            </if>
+            <if test="setmealId != null">
+                `setmeal_id` = #{setmealId},
+            </if>
+            <if test="dishFlavor != null">
+                `dish_flavor` = #{dishFlavor},
+            </if>
+            <if test="number != null">
+                `number` = #{number},
+            </if>
+            <if test="amount != null">
+                `amount` = #{amount},
+            </if>
+            <if test="createTime != null">
+                `create_time` = #{createTime},
+            </if>
+        </set>
+        WHERE `id` = #{id}
+    </update>
+</mapper>
