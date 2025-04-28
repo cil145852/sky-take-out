@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 /**
  * 地址簿
+ * @author liang
  */
 @Data
 @Builder
@@ -29,7 +30,7 @@ public class AddressBook implements Serializable {
     //手机号
     private String phone;
 
-    //性别 0 女 1 男
+    //性别 0 男 1 女
     private String sex;
 
     //省级区划编号
