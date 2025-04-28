@@ -6,6 +6,27 @@
     <select id="getByOpenId" resultType="user">
         SELECT * FROM user WHERE openid = #{openid}
     </select>
+    <select id="selectList" resultType="user">
+        SELECT *
+        FROM `user`
+        <where>
+            <if test="id != null">
+                `id` = #{id}
+            </if>
+            <if test="name != null">
+                `name` LIKE CONCAT('%',#{name},'%')
+            </if>
+            <if test="phone != null">
+                `phone` = #{phone}
+            </if>
+            <if test="sex != null">
+                `sex` = #{sex}
+            </if>
+            <if test="idNumber != null">
+                `id_number` = #{idNumber}
+            </if>
+        </where>
+    </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user`(`openid`, `name`, `phone`, `sex`, `id_number`, `avatar`, `create_time`)

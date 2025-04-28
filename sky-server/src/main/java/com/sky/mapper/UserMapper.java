@@ -3,6 +3,8 @@ package com.sky.mapper;
 import com.sky.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * @author liang
  * @version 1.0
@@ -14,4 +16,6 @@ public interface UserMapper {
    User getByOpenId(String openid);
 
    void insert(User user);
+
+   List<User> selectList(User user);
 }
