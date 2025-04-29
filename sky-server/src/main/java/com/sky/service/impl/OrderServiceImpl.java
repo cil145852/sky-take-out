@@ -1,17 +1,22 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -171,5 +176,25 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    @Override
+    public PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+        Orders queryOrders = new Orders();
+        BeanUtils.copyProperties(ordersPageQueryDTO, queryOrders);
+        queryOrders.setUserId(BaseContext.getCurrentId());
+
+        //由于是分页查询，所以不能联表查询，只能先获取订单列表，再根据订单id获取订单详情
+        PageInfo<Orders> pageInfo = new PageInfo<>(orderMapper.selectList(queryOrders));
+
+        List<OrderVO> orderVOList = pageInfo.getList().stream().map(orders -> {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+            orderVO.setOrderDetailList(orderDetailMapper.selectListByOrderId(orders.getId()));
+            return orderVO;
+        }).collect(Collectors.toList());
+
+        return new PageResult(pageInfo.getTotal(), orderVOList);
     }
 }

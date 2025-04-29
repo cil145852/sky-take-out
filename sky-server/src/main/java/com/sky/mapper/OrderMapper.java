@@ -4,6 +4,8 @@ import com.sky.entity.Orders;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
+
 /**
  * @author liang
  * @version 1.0
@@ -31,4 +33,11 @@ public interface OrderMapper {
      * @param orders
      */
     void update(Orders orders);
+
+    /**
+     * 条件查询订单
+     * @param orders
+     * @return
+     */
+    List<Orders> selectList(Orders orders);
 }

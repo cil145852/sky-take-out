@@ -28,4 +28,50 @@
         </set>
         where id = #{id}
     </update>
+    <select id="selectList" resultType="com.sky.entity.Orders">
+        SELECT *
+        FROM `orders`
+        <where>
+            <if test="id != null">
+                AND `id` = #{id}
+            </if>
+            <if test="number != null">
+                AND `number` = #{number}
+            </if>
+            <if test="status != null">
+                AND `status` = #{status}
+            </if>
+            <if test="userId != null">
+                AND `user_id` = #{userId}
+            </if>
+            <if test="addressBookId != null">
+                AND `address_book_id` = #{addressBookId}
+            </if>
+            <if test="payMethod != null">
+                AND `pay_method` = #{payMethod}
+            </if>
+            <if test="amount != null">
+                AND `amount` = #{amount}
+            </if>
+            <if test="remark != null">
+                AND `remark` LIKE CONCAT('%',#{remark},'%')
+            </if>
+            <if test="userName != null">
+                AND `user_name` LIKE CONCAT('%',#{userName},'%')
+            </if>
+            <if test="phone != null">
+                AND `phone` = #{phone}
+            </if>
+            <if test="address != null">
+                AND `address` LIKE CONCAT('%',#{address},'%')
+            </if>
+            <if test="consignee != null">
+                AND `consignee` LIKE CONCAT('%',#{consignee},'%')
+            </if>
+            <if test="deliveryStatus != null">
+                AND `delivery_status` = #{deliveryStatus}
+            </if>
+        </where>
+        ORDER BY `status` ASC
+    </select>
 </mapper>
