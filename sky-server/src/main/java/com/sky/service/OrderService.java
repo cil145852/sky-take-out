@@ -56,7 +56,7 @@ public interface OrderService {
      * @param id
      * @return
      */
-    OrderVO getOrderDetailByOrderId(Long id);
+    OrderVO getOrderDetailByOrderId(Long id, RoleType roleType);
 
     /**
      * 取消订单,本质上是修改订单状态为取消

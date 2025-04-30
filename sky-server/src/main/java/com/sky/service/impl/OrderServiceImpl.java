@@ -243,8 +243,14 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public OrderVO getOrderDetailByOrderId(Long id) {
-        OrderVO orderVO = orderMapper.selectListWithOrderDetails(Orders.builder().id(id).build()).get(0);
+    public OrderVO getOrderDetailByOrderId(Long id, RoleType roleType) {
+        Orders orders = Orders.builder()
+                .id(id)
+                .build();
+        if (roleType == RoleType.USER) {
+            orders.setUserId(BaseContext.getCurrentId());
+        }
+        OrderVO orderVO = orderMapper.selectListWithOrderDetails(orders).get(0);
         orderVO.setOrderDishes(getOrderDishStr(orderDetailMapper.selectListByOrderId(orderVO.getId())));
         return orderVO;
     }
