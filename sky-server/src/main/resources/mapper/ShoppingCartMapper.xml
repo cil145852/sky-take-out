@@ -2,7 +2,9 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.sky.mapper.ShoppingCartMapper">
-    <sql id="shoppingCartWhere">
+    <select id="selectList" resultType="shoppingCart">
+        SELECT *
+        FROM `shopping_cart`
         <where>
             <if test="userId != null">
                 AND user_id = #{userId}
@@ -20,11 +22,6 @@
                 AND name LIKE CONCAT('%',#{name},'%')
             </if>
         </where>
-    </sql>
-    <select id="selectList" resultType="shoppingCart">
-        SELECT *
-        FROM `shopping_cart`
-        <include refid="shoppingCartWhere"/>
     </select>
 
     <insert id="insert">

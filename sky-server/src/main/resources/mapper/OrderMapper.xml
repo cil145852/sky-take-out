@@ -28,50 +28,80 @@
         </set>
         where id = #{id}
     </update>
+
+    <sql id="orderWhere">
+        <where>
+            <if test="id != null">
+                AND `orders`.`id` = #{id}
+            </if>
+            <if test="number != null">
+                AND `orders`.`number` = #{number}
+            </if>
+            <if test="status != null">
+                AND `orders`.`status` = #{status}
+            </if>
+            <if test="userId != null">
+                AND `orders`.`user_id` = #{userId}
+            </if>
+            <if test="addressBookId != null">
+                AND `orders`.`address_book_id` = #{addressBookId}
+            </if>
+            <if test="payMethod != null">
+                AND `orders`.`pay_method` = #{payMethod}
+            </if>
+            <if test="amount != null">
+                AND `orders`.`amount` = #{amount}
+            </if>
+            <if test="remark != null">
+                AND `orders`.`remark` LIKE CONCAT('%',#{remark},'%')
+            </if>
+            <if test="userName != null">
+                AND `orders`.`user_name` LIKE CONCAT('%',#{userName},'%')
+            </if>
+            <if test="phone != null">
+                AND `orders`.`phone` = #{phone}
+            </if>
+            <if test="address != null">
+                AND `orders`.`address` LIKE CONCAT('%',#{address},'%')
+            </if>
+            <if test="consignee != null">
+                AND `orders`.`consignee` LIKE CONCAT('%',#{consignee},'%')
+            </if>
+            <if test="deliveryStatus != null">
+                AND `orders`.`delivery_status` = #{deliveryStatus}
+            </if>
+        </where>
+    </sql>
+
     <select id="selectList" resultType="com.sky.entity.Orders">
         SELECT *
         FROM `orders`
-        <where>
-            <if test="id != null">
-                AND `id` = #{id}
-            </if>
-            <if test="number != null">
-                AND `number` = #{number}
-            </if>
-            <if test="status != null">
-                AND `status` = #{status}
-            </if>
-            <if test="userId != null">
-                AND `user_id` = #{userId}
-            </if>
-            <if test="addressBookId != null">
-                AND `address_book_id` = #{addressBookId}
-            </if>
-            <if test="payMethod != null">
-                AND `pay_method` = #{payMethod}
-            </if>
-            <if test="amount != null">
-                AND `amount` = #{amount}
-            </if>
-            <if test="remark != null">
-                AND `remark` LIKE CONCAT('%',#{remark},'%')
-            </if>
-            <if test="userName != null">
-                AND `user_name` LIKE CONCAT('%',#{userName},'%')
-            </if>
-            <if test="phone != null">
-                AND `phone` = #{phone}
-            </if>
-            <if test="address != null">
-                AND `address` LIKE CONCAT('%',#{address},'%')
-            </if>
-            <if test="consignee != null">
-                AND `consignee` LIKE CONCAT('%',#{consignee},'%')
-            </if>
-            <if test="deliveryStatus != null">
-                AND `delivery_status` = #{deliveryStatus}
-            </if>
-        </where>
-        ORDER BY `status` ASC
+        <include refid="orderWhere"/>
+        ORDER BY `status`
+    </select>
+
+    <resultMap id="orderVO" type="com.sky.vo.OrderVO">
+        <id property="id" column="id"/>
+        <collection property="orderDetailList" ofType="orderDetail">
+            <id property="id" column="order_detail_id"/>
+            <result property="number" column="order_detail_number"/>
+            <result property="amount" column="order_detail_amount"/>
+        </collection>
+
+    </resultMap>
+    <select id="selectListWithOrderDetails" resultMap="orderVO">
+        SELECT `orders`.*,
+        `od`.id AS `order_detail_id`,
+        `od`.name,
+        `od`.image,
+        `od`.order_id,
+        `od`.dish_id,
+        `od`.setmeal_id,
+        `od`.dish_flavor,
+        `od`.number AS `order_detail_number`,
+        `od`.amount AS `order_detail_amount`
+        FROM `orders`
+        LEFT JOIN `order_detail` AS `od` ON `orders`.id = `od`.order_id
+        <include refid="orderWhere"/>
     </select>
 </mapper>
