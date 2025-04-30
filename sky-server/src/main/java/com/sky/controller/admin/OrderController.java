@@ -5,6 +5,7 @@ import com.sky.enumeration.RoleType;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.OrderService;
+import com.sky.vo.OrderStatisticsVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,13 +27,32 @@ import javax.annotation.Resource;
 @Slf4j
 public class OrderController {
 
-   @Resource
-   private OrderService orderService;
+    @Resource
+    private OrderService orderService;
 
-   @GetMapping("/conditionSearch")
-   @ApiOperation("管理端订单搜索")
-   public Result<PageResult> conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
-      PageResult pageResult = orderService.listPageOrders(ordersPageQueryDTO, RoleType.EMPLOYEE);
-      return Result.success(pageResult);
-   }
+    /**
+     * 根据订单条件进行分页查询
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    @GetMapping("/conditionSearch")
+    @ApiOperation("管理端订单搜索")
+    public Result<PageResult> conditionSearch(OrdersPageQueryDTO ordersPageQueryDTO) {
+        log.info("管理端订单搜索: {}", ordersPageQueryDTO);
+        PageResult pageResult = orderService.listPageOrders(ordersPageQueryDTO, RoleType.EMPLOYEE);
+        return Result.success(pageResult);
+    }
+
+    /**
+     * 各个状态的订单数量统计
+     *
+     * @return
+     */
+    @GetMapping("/statistics")
+    public Result<OrderStatisticsVO> statistics() {
+        log.info("各个状态的订单数量统计");
+        OrderStatisticsVO orderStatisticsVO = orderService.statistics();
+        return Result.success(orderStatisticsVO);
+    }
 }

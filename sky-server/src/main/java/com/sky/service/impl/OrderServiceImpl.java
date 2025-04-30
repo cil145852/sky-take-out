@@ -17,6 +17,7 @@ import com.sky.mapper.*;
 import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
@@ -204,6 +205,12 @@ public class OrderServiceImpl implements OrderService {
         return new PageResult(pageInfo.getTotal(), orderVOList);
     }
 
+    /**
+     * 获取订单详细信息
+     *
+     * @param ordersList
+     * @return
+     */
     private List<OrderVO> getOrderVO(List<Orders> ordersList) {
         return ordersList.stream().map(orders -> {
             OrderVO orderVO = new OrderVO();
@@ -215,6 +222,12 @@ public class OrderServiceImpl implements OrderService {
         }).collect(Collectors.toList());
     }
 
+    /**
+     * 获取订单菜品信息
+     *
+     * @param orderDetailList
+     * @return
+     */
     private String getOrderDishStr(List<OrderDetail> orderDetailList) {
         StringBuilder sb = new StringBuilder(50);
         orderDetailList.forEach(orderDetail -> {
@@ -291,5 +304,32 @@ public class OrderServiceImpl implements OrderService {
                 })
                 .collect(Collectors.toList());
         shoppingCartMapper.insertBatch(shoppingCartList);
+    }
+
+    /**
+     * 统计订单信息,即各个状态的订单数量统计
+     *
+     * @return
+     */
+    @Override
+    public OrderStatisticsVO statistics() {
+        Orders orders = new Orders();
+        //待接单数量
+        orders.setStatus(Orders.TO_BE_CONFIRMED);
+        Integer toBeConfirmedCount = orderMapper.selectCount(orders);
+
+        //已接单待派送数量
+        orders.setStatus(Orders.CONFIRMED);
+        Integer confirmedCount = orderMapper.selectCount(orders);
+
+        //派送中数量
+        orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        Integer deliveryInProgressCount = orderMapper.selectCount(orders);
+        //返回数据
+        OrderStatisticsVO orderStatisticsVO = new OrderStatisticsVO();
+        orderStatisticsVO.setToBeConfirmed(toBeConfirmedCount);
+        orderStatisticsVO.setConfirmed(confirmedCount);
+        orderStatisticsVO.setDeliveryInProgress(deliveryInProgressCount);
+        return orderStatisticsVO;
     }
 }

@@ -6,6 +6,7 @@ import com.sky.dto.OrdersSubmitDTO;
 import com.sky.enumeration.RoleType;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 
@@ -18,50 +19,63 @@ import com.sky.vo.OrderVO;
 
 public interface OrderService {
 
-   /**
-    * 提交并生成订单信息
-    * @param ordersSubmitDTO
-    * @return
-    */
-   OrderSubmitVO submitOrder(OrdersSubmitDTO ordersSubmitDTO);
+    /**
+     * 提交并生成订单信息
+     *
+     * @param ordersSubmitDTO
+     * @return
+     */
+    OrderSubmitVO submitOrder(OrdersSubmitDTO ordersSubmitDTO);
 
-   /**
-    * 订单支付
-    * @param ordersPaymentDTO
-    * @return
-    */
-   OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception;
+    /**
+     * 订单支付
+     *
+     * @param ordersPaymentDTO
+     * @return
+     */
+    OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception;
 
-   /**
-    * 支付成功，修改订单状态
-    * @param outTradeNo
-    */
-   void paySuccess(String outTradeNo);
+    /**
+     * 支付成功，修改订单状态
+     *
+     * @param outTradeNo
+     */
+    void paySuccess(String outTradeNo);
 
-   /**
-    * 历史订单分页查询
-    * @param ordersPageQueryDTO
-    * @return
-    */
-   PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO, RoleType roleType);
+    /**
+     * 历史订单分页查询
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO, RoleType roleType);
 
-   /**
-    * 根据订单id查询订单详细信息
-    * @param id
-    * @return
-    */
-   OrderVO getOrderDetailByOrderId(Long id);
+    /**
+     * 根据订单id查询订单详细信息
+     *
+     * @param id
+     * @return
+     */
+    OrderVO getOrderDetailByOrderId(Long id);
 
-   /**
-    * 取消订单,本质上是修改订单状态为取消
-    *
-    * @param id
-    */
-   void cancelOrderById(Long id);
+    /**
+     * 取消订单,本质上是修改订单状态为取消
+     *
+     * @param id
+     */
+    void cancelOrderById(Long id);
 
-   /**
-    * 再来一单,本质上是将订单明细再次添加到购物车
-    * @param id
-    */
-   void repeatOrder(Long id);
+    /**
+     * 再来一单,本质上是将订单明细再次添加到购物车
+     *
+     * @param id
+     */
+    void repeatOrder(Long id);
+
+    /**
+     * 统计订单信息,即各个状态的订单数量统计
+     *
+     * @return
+     */
+    OrderStatisticsVO statistics();
 }

@@ -57,4 +57,11 @@ public interface OrderMapper {
      * @return
      */
     List<OrderVO> selectListWithOrderDetails(@Param("orders") Orders orders);
+
+    /**
+     * 根据条件统计订单数量
+     * @param orders
+     * @return
+     */
+    Integer selectCount(@Param("orders") Orders orders);
 }

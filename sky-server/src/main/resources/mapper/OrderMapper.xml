@@ -112,4 +112,12 @@
             <include refid="orderIf"/>
         </where>
     </select>
+
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT COUNT(`id`)
+        FROM `orders`
+        <where>
+            <include refid="orderIf"/>
+        </where>
+    </select>
 </mapper>
