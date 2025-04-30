@@ -10,6 +10,7 @@ import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.exception.AddressBookBusinessException;
+import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
 import com.sky.result.PageResult;
@@ -206,5 +207,36 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderVO getOrderDetailByOrderId(Long id) {
         return orderMapper.selectListWithOrderDetails(Orders.builder().id(id).build()).get(0);
+    }
+
+    @Override
+    public void cancelOrderById(Long id) {
+        List<Orders> ordersList = orderMapper.selectList(Orders.builder().userId(BaseContext.getCurrentId()).id(id).build());
+        if (ObjectUtils.isEmpty(ordersList)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        Orders orders = ordersList.get(0);
+        //如果商家已接单或订单已完成/已取消，则不能取消
+        if (orders.getStatus() > Orders.TO_BE_CONFIRMED) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        //如果订单是待接单状态，即用户已经付款，则需要退款
+        if(orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            //调用微信支付退款接口
+            //weChatPayUtil.refund(
+            //        orders.getNumber(), //商户订单号
+            //        orders.getNumber(), //商户退款单号
+            //        new BigDecimal(0.01),//退款金额，单位 元
+            //        new BigDecimal(0.01));//原订单金额
+
+            //支付状态修改为 退款
+            orders.setPayStatus(Orders.REFUND);
+        }
+        //订单状态修改为 已取消
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelTime(LocalDateTime.now());
+        orders.setCancelReason("用户取消");
+        orderMapper.update(orders);
+
     }
 }

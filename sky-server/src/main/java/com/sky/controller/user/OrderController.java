@@ -68,6 +68,7 @@ public class OrderController {
     @GetMapping("/historyOrders")
     @ApiOperation("历史订单查询")
     public Result<PageResult> historyOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
+        log.info("历史订单查询: {}", ordersPageQueryDTO);
         PageResult pageResult = orderService.listPageOrders(ordersPageQueryDTO);
         return Result.success(pageResult);
     }
@@ -85,5 +86,18 @@ public class OrderController {
         OrderVO orderVO = orderService.getOrderDetailByOrderId(id);
         log.info("查询订单详情: orderVO = {}", orderVO);
         return Result.success(orderVO);
+    }
+
+    /**
+     * 取消订单
+     * @param id
+     * @return
+     */
+    @PutMapping("/cancel/{id}")
+    @ApiOperation("取消订单")
+    public Result cancel(@PathVariable("id") Long id) {
+        log.info("取消订单: id = {}", id);
+        orderService.cancelOrderById(id);
+        return Result.success();
     }
 }
