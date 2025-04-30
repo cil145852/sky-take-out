@@ -78,4 +78,11 @@ public interface OrderService {
      * @return
      */
     OrderStatisticsVO statistics();
+
+    /**
+     * 商家接单,本质上是修改订单状态为3已接单
+     *
+     * @param id
+     */
+    void confirm(Long id);
 }

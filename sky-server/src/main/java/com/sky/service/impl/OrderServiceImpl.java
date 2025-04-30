@@ -338,4 +338,18 @@ public class OrderServiceImpl implements OrderService {
         orderStatisticsVO.setDeliveryInProgress(deliveryInProgressCount);
         return orderStatisticsVO;
     }
+
+    /**
+     * 商家接单,本质上是修改订单状态为3已接单
+     *
+     * @param id
+     */
+    @Override
+    public void confirm(Long id) {
+        Orders orders = Orders.builder()
+                .id(id)
+                .status(Orders.CONFIRMED)
+                .build();
+        orderMapper.update(orders);
+    }
 }
