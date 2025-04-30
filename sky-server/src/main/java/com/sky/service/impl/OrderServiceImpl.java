@@ -9,6 +9,7 @@ import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
+import com.sky.enumeration.RoleType;
 import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
@@ -186,23 +187,40 @@ public class OrderServiceImpl implements OrderService {
      * @return
      */
     @Override
-    public PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
+    public PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO, RoleType roleType) {
         PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
         Orders queryOrders = new Orders();
         BeanUtils.copyProperties(ordersPageQueryDTO, queryOrders);
-        queryOrders.setUserId(BaseContext.getCurrentId());
+
+        if (roleType == RoleType.USER) {
+            queryOrders.setUserId(BaseContext.getCurrentId());
+        }
 
         //由于是分页查询，所以不能联表查询，只能先获取订单列表，再根据订单id获取订单详情
-        PageInfo<Orders> pageInfo = new PageInfo<>(orderMapper.selectList(queryOrders));
+        PageInfo<Orders> pageInfo = new PageInfo<>(orderMapper.selectList(queryOrders, ordersPageQueryDTO.getBeginTime(), ordersPageQueryDTO.getEndTime()));
 
-        List<OrderVO> orderVOList = pageInfo.getList().stream().map(orders -> {
-            OrderVO orderVO = new OrderVO();
-            BeanUtils.copyProperties(orders, orderVO);
-            orderVO.setOrderDetailList(orderDetailMapper.selectListByOrderId(orders.getId()));
-            return orderVO;
-        }).collect(Collectors.toList());
+        List<OrderVO> orderVOList = getOrderVO(pageInfo.getList());
 
         return new PageResult(pageInfo.getTotal(), orderVOList);
+    }
+
+    private List<OrderVO> getOrderVO(List<Orders> ordersList) {
+        return ordersList.stream().map(orders -> {
+            OrderVO orderVO = new OrderVO();
+            BeanUtils.copyProperties(orders, orderVO);
+            List<OrderDetail> orderDetailList = orderDetailMapper.selectListByOrderId(orders.getId());
+            orderVO.setOrderDetailList(orderDetailList);
+            orderVO.setOrderDishes(getOrderDishStr(orderDetailList));
+            return orderVO;
+        }).collect(Collectors.toList());
+    }
+
+    private String getOrderDishStr(List<OrderDetail> orderDetailList) {
+        StringBuilder sb = new StringBuilder(50);
+        orderDetailList.forEach(orderDetail -> {
+            sb.append(orderDetail.getName()).append("*").append(orderDetail.getNumber()).append(";");
+        });
+        return sb.toString();
     }
 
     /**
@@ -213,7 +231,9 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public OrderVO getOrderDetailByOrderId(Long id) {
-        return orderMapper.selectListWithOrderDetails(Orders.builder().id(id).build()).get(0);
+        OrderVO orderVO = orderMapper.selectListWithOrderDetails(Orders.builder().id(id).build()).get(0);
+        orderVO.setOrderDishes(getOrderDishStr(orderDetailMapper.selectListByOrderId(orderVO.getId())));
+        return orderVO;
     }
 
     /**
@@ -223,7 +243,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void cancelOrderById(Long id) {
-        List<Orders> ordersList = orderMapper.selectList(Orders.builder().userId(BaseContext.getCurrentId()).id(id).build());
+        List<Orders> ordersList = orderMapper.selectList(Orders.builder().userId(BaseContext.getCurrentId()).id(id).build(), null, null);
         if (ObjectUtils.isEmpty(ordersList)) {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
         }

@@ -31,44 +31,44 @@
 
     <sql id="orderWhere">
         <where>
-            <if test="id != null">
-                AND `orders`.`id` = #{id}
+            <if test="orders.id != null">
+                AND `orders`.`id` = #{orders.id}
             </if>
-            <if test="number != null">
-                AND `orders`.`number` = #{number}
+            <if test="orders.number != null">
+                AND `orders`.`number` LIKE  CONCAT('%',#{orders.number},'%')
             </if>
-            <if test="status != null">
-                AND `orders`.`status` = #{status}
+            <if test="orders.status != null">
+                AND `orders`.`status` = #{orders.status}
             </if>
-            <if test="userId != null">
-                AND `orders`.`user_id` = #{userId}
+            <if test="orders.userId != null">
+                AND `orders`.`user_id` = #{orders.userId}
             </if>
-            <if test="addressBookId != null">
-                AND `orders`.`address_book_id` = #{addressBookId}
+            <if test="orders.addressBookId != null">
+                AND `orders`.`address_book_id` = #{orders.addressBookId}
             </if>
-            <if test="payMethod != null">
-                AND `orders`.`pay_method` = #{payMethod}
+            <if test="orders.payMethod != null">
+                AND `orders`.`pay_method` = #{orders.payMethod}
             </if>
-            <if test="amount != null">
-                AND `orders`.`amount` = #{amount}
+            <if test="orders.amount != null">
+                AND `orders`.`amount` = #{orders.amount}
             </if>
-            <if test="remark != null">
-                AND `orders`.`remark` LIKE CONCAT('%',#{remark},'%')
+            <if test="orders.remark != null">
+                AND `orders`.`remark` LIKE CONCAT('%',#{orders.remark},'%')
             </if>
-            <if test="userName != null">
-                AND `orders`.`user_name` LIKE CONCAT('%',#{userName},'%')
+            <if test="orders.userName != null">
+                AND `orders`.`user_name` LIKE CONCAT('%',#{orders.userName},'%')
             </if>
-            <if test="phone != null">
-                AND `orders`.`phone` = #{phone}
+            <if test="orders.phone != null">
+                AND `orders`.`phone` LIKE CONCAT('%',#{orders.phone},'%')
             </if>
-            <if test="address != null">
-                AND `orders`.`address` LIKE CONCAT('%',#{address},'%')
+            <if test="orders.address != null">
+                AND `orders`.`address` LIKE CONCAT('%',#{orders.address},'%')
             </if>
-            <if test="consignee != null">
-                AND `orders`.`consignee` LIKE CONCAT('%',#{consignee},'%')
+            <if test="orders.consignee != null">
+                AND `orders`.`consignee` LIKE CONCAT('%',#{orders.consignee},'%')
             </if>
-            <if test="deliveryStatus != null">
-                AND `orders`.`delivery_status` = #{deliveryStatus}
+            <if test="orders.deliveryStatus != null">
+                AND `orders`.`delivery_status` = #{orders.deliveryStatus}
             </if>
         </where>
     </sql>
@@ -77,6 +77,14 @@
         SELECT *
         FROM `orders`
         <include refid="orderWhere"/>
+        <trim prefixOverrides="AND">
+            <if test="beginTime != null">
+                AND `orders`.`order_time` &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND `orders`.`order_time` &lt;= #{endTime}
+            </if>
+        </trim>
         ORDER BY `status`
     </select>
 
