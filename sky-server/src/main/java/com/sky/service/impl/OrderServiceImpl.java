@@ -179,6 +179,12 @@ public class OrderServiceImpl implements OrderService {
         orderMapper.update(orders);
     }
 
+    /**
+     * 历史订单分页查询
+     *
+     * @param ordersPageQueryDTO
+     * @return
+     */
     @Override
     public PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO) {
         PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
@@ -201,6 +207,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 根据订单id查询订单详细信息
+     *
      * @param id
      * @return
      */
@@ -209,6 +216,11 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.selectListWithOrderDetails(Orders.builder().id(id).build()).get(0);
     }
 
+    /**
+     * 取消订单,本质上是修改订单状态为取消
+     *
+     * @param id
+     */
     @Override
     public void cancelOrderById(Long id) {
         List<Orders> ordersList = orderMapper.selectList(Orders.builder().userId(BaseContext.getCurrentId()).id(id).build());
@@ -221,7 +233,7 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
         //如果订单是待接单状态，即用户已经付款，则需要退款
-        if(orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+        if (orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
             //调用微信支付退款接口
             //weChatPayUtil.refund(
             //        orders.getNumber(), //商户订单号
@@ -237,6 +249,27 @@ public class OrderServiceImpl implements OrderService {
         orders.setCancelTime(LocalDateTime.now());
         orders.setCancelReason("用户取消");
         orderMapper.update(orders);
+    }
 
+    /**
+     * 再来一单,本质上是将订单明细再次添加到购物车
+     *
+     * @param id
+     */
+    @Override
+    public void repeatOrder(Long id) {
+        Long userId = BaseContext.getCurrentId();
+        List<ShoppingCart> shoppingCartList = orderDetailMapper.selectListByOrderId(id)
+                .stream()
+                .map(orderDetail -> {
+                    ShoppingCart shoppingCart = ShoppingCart.builder()
+                            .userId(userId)
+                            .createTime(LocalDateTime.now())
+                            .build();
+                    BeanUtils.copyProperties(orderDetail, shoppingCart);
+                    return shoppingCart;
+                })
+                .collect(Collectors.toList());
+        shoppingCartMapper.insertBatch(shoppingCartList);
     }
 }

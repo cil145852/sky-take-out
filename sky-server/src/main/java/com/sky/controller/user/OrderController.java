@@ -100,4 +100,19 @@ public class OrderController {
         orderService.cancelOrderById(id);
         return Result.success();
     }
+
+
+    /**
+     * 再来一单
+     *
+     * @param id
+     * @return
+     */
+    @PostMapping("/repetition/{id}")
+    @ApiOperation("再来一单")
+    public Result repeat(@PathVariable("id") Long id) {
+        log.info("再来一单: id = {}", id);
+        orderService.repeatOrder(id);
+        return Result.success();
+    }
 }

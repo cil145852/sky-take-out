@@ -57,4 +57,10 @@ public interface OrderService {
     * @param id
     */
    void cancelOrderById(Long id);
+
+   /**
+    * 再来一单,本质上是将订单明细再次添加到购物车
+    * @param id
+    */
+   void repeatOrder(Long id);
 }
