@@ -7,6 +7,7 @@ import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
 import com.sky.enumeration.RoleType;
@@ -273,15 +274,7 @@ public class OrderServiceImpl implements OrderService {
         }
         //如果订单是待接单状态，即用户已经付款，则需要退款
         if (orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
-            //调用微信支付退款接口
-            //weChatPayUtil.refund(
-            //        orders.getNumber(), //商户订单号
-            //        orders.getNumber(), //商户退款单号
-            //        new BigDecimal(0.01),//退款金额，单位 元
-            //        new BigDecimal(0.01));//原订单金额
-
-            //支付状态修改为 退款
-            orders.setPayStatus(Orders.REFUND);
+           refund(orders);
         }
         //订单状态修改为 已取消
         orders.setStatus(Orders.CANCELLED);
@@ -351,5 +344,44 @@ public class OrderServiceImpl implements OrderService {
                 .status(Orders.CONFIRMED)
                 .build();
         orderMapper.update(orders);
+    }
+
+    /**
+     * 商家拒单,本质上是修改订单状态为6已取消
+     * 如果用户已经付款，则需要退款
+     *
+     * @param ordersRejectionDTO
+     */
+    @Override
+    public void rejectOrder(OrdersRejectionDTO ordersRejectionDTO) {
+        Orders orders = orderMapper.selectList(Orders.builder().id(ordersRejectionDTO.getId()).build(), null, null).get(0);
+        //如果订单状态不是待接单，则不能拒单
+        if (orders == null || orders.getStatus().equals(Orders.CONFIRMED)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        if (orders.getPayStatus().equals(Orders.PAID)) {
+            refund(orders);
+        }
+        orders.setStatus(Orders.CANCELLED);
+        orders.setRejectionReason(ordersRejectionDTO.getRejectionReason());
+        orders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 退款某个订单
+     *
+     * @param orders
+     */
+    private void refund(Orders orders) {
+        //调用微信支付退款接口
+        //weChatPayUtil.refund(
+        //        orders.getNumber(), //商户订单号
+        //        orders.getNumber(), //商户退款单号
+        //        new BigDecimal(0.01),//退款金额，单位 元
+        //        new BigDecimal(0.01));//原订单金额
+
+        //支付状态修改为 退款
+        orders.setPayStatus(Orders.REFUND);
     }
 }

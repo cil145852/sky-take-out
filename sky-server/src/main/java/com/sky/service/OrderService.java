@@ -2,6 +2,7 @@ package com.sky.service;
 
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
+import com.sky.dto.OrdersRejectionDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.enumeration.RoleType;
 import com.sky.result.PageResult;
@@ -85,4 +86,12 @@ public interface OrderService {
      * @param id
      */
     void confirm(Long id);
+
+    /**
+     * 商家拒单,本质上是修改订单状态为6已取消
+     * 如果用户已经付款，则需要退款
+     *
+     * @param ordersRejectionDTO
+     */
+    void rejectOrder(OrdersRejectionDTO ordersRejectionDTO);
 }
