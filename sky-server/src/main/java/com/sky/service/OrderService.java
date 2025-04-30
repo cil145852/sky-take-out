@@ -3,6 +3,7 @@ package com.sky.service;
 import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
+import com.sky.enumeration.RoleType;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
@@ -42,7 +43,7 @@ public interface OrderService {
     * @param ordersPageQueryDTO
     * @return
     */
-   PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO);
+   PageResult listPageOrders(OrdersPageQueryDTO ordersPageQueryDTO, RoleType roleType);
 
    /**
     * 根据订单id查询订单详细信息
