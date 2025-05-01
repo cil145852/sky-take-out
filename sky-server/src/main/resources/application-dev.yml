@@ -19,4 +19,9 @@ sky:
   wechat:
     appid: wx16112896e9ee4b11
     secret: e57303d5231ee4842dbf5dc01c60d348
+  shop:
+    address: 浙江省舟山市定海区临城街道海大南路1号浙江海洋大学新城校区
+  baidu:
+    ak: dni0Fcqi6bmryyuxwP7iI7uIeBfhabZG
+
 

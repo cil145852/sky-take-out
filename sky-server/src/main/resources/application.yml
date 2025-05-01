@@ -58,6 +58,10 @@ sky:
   wechat:
     secret: ${sky.wechat.secret}
     appid: ${sky.wechat.appid}
+  shop:
+    address: ${sky.shop.address}
+  baidu:
+    ak: ${sky.baidu.ak}
 #    mchid: ${sky.wechat.mchid}
 #    mch-serial-no: ${sky.wechat.mch-serial-no}
 #    private-key-file-path: ${sky.wechat.private-key-file-path}
