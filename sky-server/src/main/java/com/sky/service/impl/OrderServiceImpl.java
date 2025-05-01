@@ -5,10 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersRejectionDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.entity.*;
 import com.sky.enumeration.RoleType;
 import com.sky.exception.AddressBookBusinessException;
@@ -21,6 +18,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +27,7 @@ import org.springframework.util.ObjectUtils;
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -40,6 +39,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     @Resource
@@ -257,29 +257,43 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 取消订单,本质上是修改订单状态为取消
+     * 取消订单,本质上是修改订单状态为6已取消
      *
-     * @param id
+     * @param ordersCancelDTO
+     * @param roleType        角色类型 分为 用户和商家
      */
     @Override
-    public void cancelOrderById(Long id) {
-        List<Orders> ordersList = orderMapper.selectList(Orders.builder().userId(BaseContext.getCurrentId()).id(id).build(), null, null);
+    public void cancelOrder(OrdersCancelDTO ordersCancelDTO, RoleType roleType) {
+        Orders orders = new Orders();
+        orders.setId(ordersCancelDTO.getId());
+        if (roleType == RoleType.USER) {
+            orders.setUserId(BaseContext.getCurrentId());
+        }
+        List<Orders> ordersList = orderMapper.selectList(orders, null, null);
         if (ObjectUtils.isEmpty(ordersList)) {
             throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
         }
-        Orders orders = ordersList.get(0);
-        //如果商家已接单或订单已完成/已取消，则不能取消
-        if (orders.getStatus() > Orders.TO_BE_CONFIRMED) {
+        orders = ordersList.get(0);
+        //对于用户,如果商家已接单或订单已完成/已取消，则不能取消
+        if (roleType == RoleType.USER && orders.getStatus() > Orders.TO_BE_CONFIRMED) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
-        //如果订单是待接单状态，即用户已经付款，则需要退款
-        if (orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
-           refund(orders);
+        //对于商家，订单已经完成或取消不能取消，待接单时也不能取消而是是拒绝接单
+        if (roleType == RoleType.EMPLOYEE
+                && (orders.getStatus() > Orders.DELIVERY_IN_PROGRESS
+                || orders.getStatus().equals(Orders.TO_BE_CONFIRMED))) {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
+
+        //如果用户已经付款，则需要退款
+        if (orders.getStatus() > Orders.PENDING_PAYMENT && Objects.equals(orders.getPayStatus(), Orders.PAID)) {
+            refund(orders);
+        }
+
         //订单状态修改为 已取消
         orders.setStatus(Orders.CANCELLED);
         orders.setCancelTime(LocalDateTime.now());
-        orders.setCancelReason("用户取消");
+        orders.setCancelReason(ordersCancelDTO.getCancelReason());
         orderMapper.update(orders);
     }
 
@@ -374,6 +388,7 @@ public class OrderServiceImpl implements OrderService {
      * @param orders
      */
     private void refund(Orders orders) {
+        log.info("正在给订单号 {} 退款", orders.getNumber());
         //调用微信支付退款接口
         //weChatPayUtil.refund(
         //        orders.getNumber(), //商户订单号

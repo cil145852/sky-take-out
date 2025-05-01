@@ -1,9 +1,6 @@
 package com.sky.service;
 
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersRejectionDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.enumeration.RoleType;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
@@ -60,11 +57,11 @@ public interface OrderService {
     OrderVO getOrderDetailByOrderId(Long id, RoleType roleType);
 
     /**
-     * 取消订单,本质上是修改订单状态为取消
-     *
-     * @param id
+     * 取消订单,本质上是修改订单状态为6已取消
+     * @param ordersCancelDTO
+     * @param roleType 角色类型 分为 用户和商家
      */
-    void cancelOrderById(Long id);
+    void cancelOrder(OrdersCancelDTO ordersCancelDTO, RoleType roleType);
 
     /**
      * 再来一单,本质上是将订单明细再次添加到购物车

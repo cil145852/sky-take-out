@@ -83,7 +83,7 @@
                 AND `orders`.`order_time` &lt;= #{endTime}
             </if>
         </where>
-        ORDER BY `status`
+        ORDER BY `orders`.`status`, `orders`.`order_time` DESC
     </select>
 
     <resultMap id="orderVO" type="com.sky.vo.OrderVO">
