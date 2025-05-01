@@ -99,4 +99,11 @@ public interface OrderService {
      * @param id
      */
     void deliverOrder(Long id);
+
+    /**
+     * 完成订单,本质上是修改订单状态为5已完成
+     *
+     * @param id
+     */
+    void completeOrder(Long id);
 }

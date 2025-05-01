@@ -245,12 +245,7 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public OrderVO getOrderDetailByOrderId(Long id, RoleType roleType) {
-        Orders orders = Orders.builder()
-                .id(id)
-                .build();
-        if (roleType == RoleType.USER) {
-            orders.setUserId(BaseContext.getCurrentId());
-        }
+        Orders orders = getOrderById(id, roleType);
         OrderVO orderVO = orderMapper.selectListWithOrderDetails(orders).get(0);
         orderVO.setOrderDishes(getOrderDishStr(orderDetailMapper.selectListByOrderId(orderVO.getId())));
         return orderVO;
@@ -264,29 +259,21 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void cancelOrder(OrdersCancelDTO ordersCancelDTO, RoleType roleType) {
-        Orders orders = new Orders();
-        orders.setId(ordersCancelDTO.getId());
-        if (roleType == RoleType.USER) {
-            orders.setUserId(BaseContext.getCurrentId());
-        }
-        List<Orders> ordersList = orderMapper.selectList(orders, null, null);
-        if (ObjectUtils.isEmpty(ordersList)) {
-            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
-        }
-        orders = ordersList.get(0);
+        Orders orders = getOrderById(ordersCancelDTO.getId(), roleType);
+        Integer ordersStatus = orders.getStatus();
         //对于用户,如果商家已接单或订单已完成/已取消，则不能取消
-        if (roleType == RoleType.USER && orders.getStatus() > Orders.TO_BE_CONFIRMED) {
+        if (roleType == RoleType.USER && ordersStatus > Orders.TO_BE_CONFIRMED) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
-        //对于商家，订单已经完成或取消不能取消，待接单时也不能取消而是是拒绝接单
+        //对于商家，订单已经取消不能取消，待接单时也不能取消而是是拒绝接单
         if (roleType == RoleType.EMPLOYEE
-                && (orders.getStatus() > Orders.DELIVERY_IN_PROGRESS
-                || orders.getStatus().equals(Orders.TO_BE_CONFIRMED))) {
+                && (ordersStatus.equals(Orders.CANCELLED))
+                || ordersStatus.equals(Orders.TO_BE_CONFIRMED)) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
 
         //如果用户已经付款，则需要退款
-        if (orders.getStatus() > Orders.PENDING_PAYMENT && Objects.equals(orders.getPayStatus(), Orders.PAID)) {
+        if (ordersStatus > Orders.PENDING_PAYMENT && Objects.equals(orders.getPayStatus(), Orders.PAID)) {
             refund(orders);
         }
 
@@ -353,11 +340,14 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void confirm(Long id) {
-        Orders orders = Orders.builder()
-                .id(id)
-                .status(Orders.CONFIRMED)
-                .build();
-        orderMapper.update(orders);
+        Orders orders = getOrderById(id, RoleType.EMPLOYEE);
+        if (orders.getStatus().equals(Orders.TO_BE_CONFIRMED)) {
+            //如果订单状态不是待接单，则不能接单
+            orders.setStatus(Orders.CONFIRMED);
+            orderMapper.update(orders);
+        } else {
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
     }
 
     /**
@@ -368,9 +358,9 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void rejectOrder(OrdersRejectionDTO ordersRejectionDTO) {
-        Orders orders = orderMapper.selectList(Orders.builder().id(ordersRejectionDTO.getId()).build(), null, null).get(0);
+        Orders orders = getOrderById(ordersRejectionDTO.getId(), RoleType.EMPLOYEE);
         //如果订单状态不是待接单，则不能拒单
-        if (orders == null || orders.getStatus().equals(Orders.CONFIRMED)) {
+        if (orders.getStatus().equals(Orders.CONFIRMED)) {
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
         if (orders.getPayStatus().equals(Orders.PAID)) {
@@ -407,18 +397,49 @@ public class OrderServiceImpl implements OrderService {
      */
     @Override
     public void deliverOrder(Long id) {
-        Orders orders = new Orders();
-        orders.setId(id);
-        List<Orders> ordersList = orderMapper.selectList(orders, null, null);
-        if (ObjectUtils.isEmpty(ordersList)) {
-            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
-        }
-        orders = ordersList.get(0);
+        Orders orders = getOrderById(id, RoleType.EMPLOYEE);
         if (!orders.getStatus().equals(Orders.CONFIRMED)) {
             //只有已接单的订单才能派送
             throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
         }
         orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
         orderMapper.update(orders);
+    }
+
+    /**
+     * 完成订单,本质上是修改订单状态为5已完成
+     *
+     * @param id
+     */
+    @Override
+    public void completeOrder(Long id) {
+        Orders orders = getOrderById(id, RoleType.EMPLOYEE);
+        if (!orders.getStatus().equals(Orders.DELIVERY_IN_PROGRESS)) {
+            //只有派送中的订单才能完成
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        orders.setStatus(Orders.COMPLETED);
+        orders.setDeliveryTime(LocalDateTime.now());
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 调用持久层接口通过id获取订单
+     *
+     * @param id
+     * @return
+     */
+    private Orders getOrderById(Long id, RoleType roleType) {
+        Orders orders = new Orders();
+        orders.setId(id);
+        if (roleType.equals(RoleType.USER)) {
+            //如果是用户，则只能查询当前用户下的订单
+            orders.setUserId(BaseContext.getCurrentId());
+        }
+        List<Orders> ordersList = orderMapper.selectList(orders, null, null);
+        if (ObjectUtils.isEmpty(ordersList)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        return ordersList.get(0);
     }
 }
