@@ -103,6 +103,7 @@ public class OrderController {
 
     /**
      * 商家取消订单
+     *
      * @param ordersCancelDTO
      * @return
      */
@@ -111,6 +112,20 @@ public class OrderController {
     public Result cancel(@RequestBody OrdersCancelDTO ordersCancelDTO) {
         log.info("商家取消订单: {}", ordersCancelDTO);
         orderService.cancelOrder(ordersCancelDTO, RoleType.EMPLOYEE);
+        return Result.success();
+    }
+
+    /**
+     * 订单派送
+     *
+     * @param id 订单id
+     * @return
+     */
+    @PutMapping("/delivery/{id}")
+    @ApiOperation("订单派送")
+    public Result deliver(@PathVariable("id") Long id) {
+        log.info("订单派送送: {}", id);
+        orderService.deliverOrder(id);
         return Result.success();
     }
 }

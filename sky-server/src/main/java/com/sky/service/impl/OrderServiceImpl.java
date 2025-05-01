@@ -138,8 +138,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderPaymentVO payment(OrdersPaymentDTO ordersPaymentDTO) throws Exception {
         // 当前登录用户id
-        Long userId = BaseContext.getCurrentId();
-        User user = userMapper.selectList(User.builder().id(userId).build()).get(0);
+        //Long userId = BaseContext.getCurrentId();
+        //User user = userMapper.selectList(User.builder().id(userId).build()).get(0);
 
         //调用微信支付接口，生成预支付交易单
         //JSONObject jsonObject = weChatPayUtil.pay(
@@ -398,5 +398,27 @@ public class OrderServiceImpl implements OrderService {
 
         //支付状态修改为 退款
         orders.setPayStatus(Orders.REFUND);
+    }
+
+    /**
+     * 商家派送订单,本质上是修改订单状态为4派送中
+     *
+     * @param id
+     */
+    @Override
+    public void deliverOrder(Long id) {
+        Orders orders = new Orders();
+        orders.setId(id);
+        List<Orders> ordersList = orderMapper.selectList(orders, null, null);
+        if (ObjectUtils.isEmpty(ordersList)) {
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        orders = ordersList.get(0);
+        if (!orders.getStatus().equals(Orders.CONFIRMED)) {
+            //只有已接单的订单才能派送
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+        orders.setStatus(Orders.DELIVERY_IN_PROGRESS);
+        orderMapper.update(orders);
     }
 }

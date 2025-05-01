@@ -58,8 +58,9 @@ public interface OrderService {
 
     /**
      * 取消订单,本质上是修改订单状态为6已取消
+     *
      * @param ordersCancelDTO
-     * @param roleType 角色类型 分为 用户和商家
+     * @param roleType        角色类型 分为 用户和商家
      */
     void cancelOrder(OrdersCancelDTO ordersCancelDTO, RoleType roleType);
 
@@ -91,4 +92,11 @@ public interface OrderService {
      * @param ordersRejectionDTO
      */
     void rejectOrder(OrdersRejectionDTO ordersRejectionDTO);
+
+    /**
+     * 商家派送订单,本质上是修改订单状态为4派送中
+     *
+     * @param id
+     */
+    void deliverOrder(Long id);
 }
