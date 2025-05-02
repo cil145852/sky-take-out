@@ -38,7 +38,7 @@ public interface OrderMapper {
      *
      * @param orders
      */
-    void update(Orders orders);
+    void update(@Param("orders") Orders orders);
 
     /**
      * 条件查询订单
@@ -60,6 +60,7 @@ public interface OrderMapper {
 
     /**
      * 根据条件统计订单数量
+     *
      * @param orders
      * @return
      */

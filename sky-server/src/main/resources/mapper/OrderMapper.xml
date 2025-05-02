@@ -15,18 +15,17 @@
     </insert>
 
     <update id="update" parameterType="com.sky.entity.Orders">
-        update orders
+        UPDATE `orders`
         <set>
-            <if test="cancelReason != null and cancelReason!='' "> cancel_reason=#{cancelReason}, </if>
-            <if test="rejectionReason != null and rejectionReason!='' "> rejection_reason=#{rejectionReason}, </if>
-            <if test="cancelTime != null"> cancel_time=#{cancelTime}, </if>
-            <if test="payStatus != null"> pay_status=#{payStatus}, </if>
-            <if test="payMethod != null"> pay_method=#{payMethod}, </if>
-            <if test="checkoutTime != null"> checkout_time=#{checkoutTime}, </if>
-            <if test="status != null"> status = #{status}, </if>
-            <if test="deliveryTime != null"> delivery_time = #{deliveryTime} </if>
+            <if test="orders.cancelReason != null and orders.cancelReason != '' ">`orders`.`cancel_reason`=#{orders.cancelReason},</if>
+            <if test="orders.cancelTime != null">`orders`.`cancel_time`=#{orders.cancelTime},</if>
+            <if test="orders.checkoutTime != null">`orders`.`checkout_time`=#{orders.checkoutTime},</if>
+            <if test="orders.status != null">`orders`.`status` = #{orders.status},</if>
+            <if test="orders.payStatus != null">`orders`.`pay_status`=#{orders.payStatus},</if>
+            <if test="orders.rejectionReason != null and orders.rejectionReason != '' ">`orders`.`rejection_reason`=#{orders.rejectionReason},</if>
+            <if test="orders.deliveryTime != null">`orders`.`delivery_time` = #{orders.deliveryTime}</if>
         </set>
-        where id = #{id}
+        where `orders`.`id` = #{orders.id}
     </update>
 
     <sql id="orderIf">
