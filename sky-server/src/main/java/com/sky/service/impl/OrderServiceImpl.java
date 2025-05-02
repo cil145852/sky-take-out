@@ -21,6 +21,7 @@ import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
+import com.sky.websocket.WebSocketServer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +59,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Resource
     private OrderDetailMapper orderDetailMapper;
+
+    @Resource
+    private WebSocketServer webSocketServer;
 
     @Value("${sky.shop.address}")
     private String shopAddress;
@@ -190,6 +194,13 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+
+        //用户下单后向管理端发送订单提醒
+        Map<String, Object> message = new HashMap<>();
+        message.put("type", 1);
+        message.put("orderId", ordersDB.getId());
+        message.put("content", "订单号：" + ordersDB.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(message));
     }
 
     /**
@@ -516,7 +527,7 @@ public class OrderServiceImpl implements OrderService {
         if (distance > 5000) {
             //配送距离超过5000米
             log.info("商家与用户间距离{}", distance);
-            throw new OrderBusinessException("超出配送范围");
+            //throw new OrderBusinessException("超出配送范围");
         }
     }
 }
