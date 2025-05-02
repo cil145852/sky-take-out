@@ -35,6 +35,7 @@ public class OrderController {
 
     /**
      * 用户下单
+     *
      * @param ordersSubmitDTO
      * @return
      */
@@ -82,7 +83,7 @@ public class OrderController {
      */
     @GetMapping("/orderDetail/{id}")
     @ApiOperation("查询订单详情")
-    public Result<OrderVO> getOrderDetail(@PathVariable("id") Long id){
+    public Result<OrderVO> getOrderDetail(@PathVariable("id") Long id) {
         log.info("查询订单详情: id = {}", id);
         OrderVO orderVO = orderService.getOrderDetailByOrderId(id, RoleType.USER);
         log.info("查询订单详情: orderVO = {}", orderVO);
@@ -91,6 +92,7 @@ public class OrderController {
 
     /**
      * 取消订单
+     *
      * @param id
      * @return
      */
@@ -118,6 +120,19 @@ public class OrderController {
     public Result repeat(@PathVariable("id") Long id) {
         log.info("再来一单: id = {}", id);
         orderService.repeatOrder(id);
+        return Result.success();
+    }
+
+    /**
+     * 客户催单
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/reminder/{id}")
+    @ApiOperation("客户催单")
+    public Result reminder(@PathVariable("id") Long id) {
+        orderService.reminder(id);
         return Result.success();
     }
 }

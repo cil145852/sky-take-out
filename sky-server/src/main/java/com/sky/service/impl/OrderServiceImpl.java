@@ -530,4 +530,20 @@ public class OrderServiceImpl implements OrderService {
             //throw new OrderBusinessException("超出配送范围");
         }
     }
+
+    /**
+     * 客户催单，向管理端发送催单消息
+     *
+     * @param id
+     */
+    @Override
+    public void reminder(Long id) {
+        Orders orders = getOrderById(id, RoleType.USER);
+        Map<String, Object> message = new HashMap<>();
+        //type: 1表示来单提醒  2表示催单消息
+        message.put("type", 2);
+        message.put("orderId", orders.getId());
+        message.put("content", "订单号: " + orders.getNumber());
+        webSocketServer.sendToAllClient(JSON.toJSONString(message));
+    }
 }
