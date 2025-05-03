@@ -5,6 +5,7 @@ import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 
+import java.io.OutputStream;
 import java.time.LocalDate;
 
 /**
@@ -51,4 +52,11 @@ public interface ReportService {
      * @return
      */
     SalesTop10ReportVO getSalesTop10(LocalDate begin, LocalDate end);
+
+    /**
+     * 导出Excel运营数据报表
+     *
+     * @param outputStream 输出流，用于将Excel数据写入到输出流中
+     */
+    void exportBusinessData(OutputStream outputStream);
 }
