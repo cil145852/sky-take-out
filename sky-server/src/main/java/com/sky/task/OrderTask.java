@@ -44,6 +44,9 @@ public class OrderTask {
         }
     }
 
+    /**
+     * 处理自动取消订单
+     */
     @Scheduled(cron = "0 0 1 * * ?")
     public void processDeliveryOrders() {
         log.info("将派送的订单自动设置为已完成");

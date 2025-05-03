@@ -27,6 +27,18 @@
             </if>
         </where>
     </select>
+    <select id="countUserByDateTime" resultType="java.lang.Integer">
+        SELECT COUNT(`id`)
+        FROM `user`
+        <where>
+            <if test="beginTime != null">
+                AND `create_time` &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND `create_time` &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `user`(`openid`, `name`, `phone`, `sex`, `id_number`, `avatar`, `create_time`)

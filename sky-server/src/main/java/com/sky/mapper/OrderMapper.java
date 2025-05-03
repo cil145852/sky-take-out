@@ -48,7 +48,8 @@ public interface OrderMapper {
      */
     List<Orders> selectList(@Param("orders") Orders orders,
                             @Param("beginTime") LocalDateTime beginTime,
-                            @Param("endTime") LocalDateTime endTime);
+                            @Param("endTime") LocalDateTime endTime
+    );
 
     /**
      * 条件查询订单详细信息
@@ -66,8 +67,16 @@ public interface OrderMapper {
      */
     Integer selectCount(@Param("orders") Orders orders);
 
+    /**
+     * 根据时间范围统计订单总金额
+     * @param beginTime
+     * @param endTime
+     * @param status
+     * @return
+     */
     Double sumOfAmountByDateTime(
             @Param("beginTime") LocalDateTime beginTime,
             @Param("endTime") LocalDateTime endTime,
-            @Param("status") Integer status);
+            @Param("status") Integer status
+    );
 }
