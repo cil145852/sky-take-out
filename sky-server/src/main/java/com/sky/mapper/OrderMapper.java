@@ -65,4 +65,9 @@ public interface OrderMapper {
      * @return
      */
     Integer selectCount(@Param("orders") Orders orders);
+
+    Double sumOfAmountByDateTime(
+            @Param("beginTime") LocalDateTime beginTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("status") Integer status);
 }
