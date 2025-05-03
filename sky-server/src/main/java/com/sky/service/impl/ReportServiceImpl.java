@@ -1,10 +1,13 @@
 package com.sky.service.impl;
 
+import com.sky.dto.GoodsSalesDTO;
 import com.sky.entity.Orders;
+import com.sky.mapper.OrderDetailMapper;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
 import com.sky.vo.OrderReportVO;
+import com.sky.vo.SalesTop10ReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author liang
@@ -33,6 +37,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private OrderDetailMapper orderDetailMapper;
 
     /**
      * 统计指定时间范围内的营业额
@@ -125,6 +132,36 @@ public class ReportServiceImpl implements ReportService {
                 .totalOrderCount(orderCount)
                 .validOrderCount(validOrderCount)
                 .orderCompletionRate(orderCompletionRate)
+                .build();
+    }
+
+    /**
+     * 查询指定时间范围菜品/套餐销量排名top10
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    @Override
+    public SalesTop10ReportVO getSalesTop10(LocalDate begin, LocalDate end) {
+        LocalDateTime beginTime = LocalDateTime.of(begin, LocalTime.MIN);
+        LocalDateTime endTime = LocalDateTime.of(end, LocalTime.MAX);
+        List<GoodsSalesDTO> salesTop10 = orderDetailMapper.getSalesTop10(beginTime, endTime);
+
+        List<String> nameList = salesTop10
+                .stream()
+                .map(GoodsSalesDTO::getName)
+                .collect(Collectors.toList());
+
+        List<Integer> numberList = salesTop10
+                .stream()
+                .map(GoodsSalesDTO::getNumber)
+                .collect(Collectors.toList());
+
+        return SalesTop10ReportVO
+                .builder()
+                .nameList(StringUtils.collectionToCommaDelimitedString(nameList))
+                .numberList(StringUtils.collectionToCommaDelimitedString(numberList))
                 .build();
     }
 
