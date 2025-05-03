@@ -69,12 +69,27 @@ public interface OrderMapper {
 
     /**
      * 根据时间范围统计订单总金额
+     *
      * @param beginTime
      * @param endTime
      * @param status
      * @return
      */
     Double sumOfAmountByDateTime(
+            @Param("beginTime") LocalDateTime beginTime,
+            @Param("endTime") LocalDateTime endTime,
+            @Param("status") Integer status
+    );
+
+    /**
+     * 根据时间范围统计指定状态的订单数量
+     *
+     * @param beginTime
+     * @param endTime
+     * @param status
+     * @return
+     */
+    Integer countByDateTime(
             @Param("beginTime") LocalDateTime beginTime,
             @Param("endTime") LocalDateTime endTime,
             @Param("status") Integer status

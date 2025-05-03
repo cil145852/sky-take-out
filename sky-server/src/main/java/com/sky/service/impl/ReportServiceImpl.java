@@ -4,6 +4,7 @@ import com.sky.entity.Orders;
 import com.sky.mapper.OrderMapper;
 import com.sky.mapper.UserMapper;
 import com.sky.service.ReportService;
+import com.sky.vo.OrderReportVO;
 import com.sky.vo.TurnoverReportVO;
 import com.sky.vo.UserReportVO;
 import lombok.extern.slf4j.Slf4j;
@@ -86,6 +87,48 @@ public class ReportServiceImpl implements ReportService {
     }
 
     /**
+     * 统计指定时间范围内的订单数据
+     *
+     * @param begin
+     * @param end
+     * @return
+     */
+    @Override
+    public OrderReportVO queryOrdersStatistics(LocalDate begin, LocalDate end) {
+        List<LocalDate> dateList = getDateList(begin, end);
+        List<Integer> orderCountList = new ArrayList<>();
+        List<Integer> validOrderCountList = new ArrayList<>();
+        dateList.forEach(date -> {
+            LocalDateTime beginTime = LocalDateTime.of(date, LocalTime.MIN);
+            LocalDateTime endTime = LocalDateTime.of(date, LocalTime.MAX);
+            //查询当日的订单数量
+            Integer orderCount = orderMapper.countByDateTime(beginTime, endTime, null);
+            orderCountList.add(orderCount);
+            //查询当日的有效订单数量
+            Integer validOrderCount = orderMapper.countByDateTime(beginTime, endTime, Orders.COMPLETED);
+            validOrderCountList.add(validOrderCount);
+        });
+        //订单总数
+        Integer orderCount = sum(orderCountList);
+        //有效订单总数
+        Integer validOrderCount = sum(validOrderCountList);
+        //订单完成率
+        Double orderCompletionRate = 0.0;
+        if (orderCount != 0) {
+            orderCompletionRate = validOrderCount.doubleValue() / orderCount;
+        }
+        return OrderReportVO
+                .builder()
+                .dateList(StringUtils.collectionToCommaDelimitedString(dateList))
+                .orderCountList(StringUtils.collectionToCommaDelimitedString(orderCountList))
+                .validOrderCountList(StringUtils.collectionToCommaDelimitedString(validOrderCountList))
+                .totalOrderCount(orderCount)
+                .validOrderCount(validOrderCount)
+                .orderCompletionRate(orderCompletionRate)
+                .build();
+    }
+
+    /**
      * 获取指定时间范围内的日期集合
      *
      * @param begin
@@ -99,5 +142,15 @@ public class ReportServiceImpl implements ReportService {
             begin = begin.plusDays(1);
         } while (!begin.isAfter(end));
         return dateList;
+    }
+
+    /**
+     * 求和
+     *
+     * @param list
+     * @return
+     */
+    private Integer sum(List<Integer> list) {
+        return list.stream().reduce(0, Integer::sum);
     }
 }

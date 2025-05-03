@@ -134,4 +134,19 @@
             </if>
         </where>
     </select>
+    <select id="countByDateTime" resultType="java.lang.Integer">
+        SELECT COUNT(`id`)
+        FROM `orders`
+        <where>
+            <if test="beginTime != null">
+                AND `orders`.`order_time` &gt;= #{beginTime}
+            </if>
+            <if test="endTime != null">
+                AND `orders`.`order_time` &lt;= #{endTime}
+            </if>
+            <if test="status != null">
+                AND `orders`.`status` = #{status}
+            </if>
+        </where>
+    </select>
 </mapper>
