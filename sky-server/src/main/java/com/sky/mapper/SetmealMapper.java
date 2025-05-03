@@ -5,7 +5,6 @@ import com.sky.entity.Setmeal;
 import com.sky.enumeration.OperationType;
 import com.sky.vo.SetmealVO;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -16,15 +15,16 @@ import java.util.List;
 public interface SetmealMapper {
 
     /**
-     * 根据分类id查询套餐的数量
-     * @param id
+     * 根据条件查询套餐数量
+     *
+     * @param setmeal
      * @return
      */
-    @Select("select count(id) from setmeal where category_id = #{categoryId}")
-    Integer countByCategoryId(Long id);
+    Integer countSetmeal(Setmeal setmeal);
 
     /**
      * 修改菜品套餐
+     *
      * @param setmeal
      */
     @AutoFill(OperationType.UPDATE)
@@ -32,6 +32,7 @@ public interface SetmealMapper {
 
     /**
      * 新增套餐
+     *
      * @param setmeal
      */
     @AutoFill(OperationType.INSERT)
@@ -39,6 +40,7 @@ public interface SetmealMapper {
 
     /**
      * 根据查询条件查询套餐信息和套餐所属分类的信息
+     *
      * @param setmeal
      * @return
      */
@@ -46,12 +48,14 @@ public interface SetmealMapper {
 
     /**
      * 根据id批量删除套餐
+     *
      * @param ids
      */
     void deleteBatch(List<Long> ids);
 
     /**
      * 根据id批量查询套餐
+     *
      * @param ids
      * @return
      */
@@ -59,6 +63,7 @@ public interface SetmealMapper {
 
     /**
      * 根据条件查询套餐及套餐分类和关联的菜品信息
+     *
      * @param setmeal
      * @return
      */
@@ -66,6 +71,7 @@ public interface SetmealMapper {
 
     /**
      * 根据条件查询套餐
+     *
      * @param setmeal
      * @return
      */

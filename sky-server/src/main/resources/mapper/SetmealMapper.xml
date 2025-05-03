@@ -98,4 +98,9 @@
         <include refid="setmealWhere"/>
         ORDER BY `setmeal`.update_time DESC
     </select>
+    <select id="countSetmeal" resultType="java.lang.Integer">
+        SELECT count(`id`)
+        FROM `setmeal`
+        <include refid="setmealWhere"/>
+    </select>
 </mapper>

@@ -125,4 +125,10 @@
         <include refid="dishWhere"/>
         ORDER BY `dish`.create_time DESC
     </select>
+
+    <select id="countDish" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM `dish`
+        <include refid="dishWhere"/>
+    </select>
 </mapper>
